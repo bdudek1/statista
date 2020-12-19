@@ -10,7 +10,13 @@
     <p>Id: <input type="text" th:field="*{id}" /></p>
     <p>Data values separator: <input type="text" th:field="*{separator}" /></p>
     <p>Data set: <input type="text" th:field="*{content}" /></p>
-    <p><input type="submit" value="Submit" /> <input type="reset" value="Reset" /></p>
+    <p><input type="submit" value="Submit" /></p>
 </form>
+<p>Data sets:</p>
+<tr th:each="dataSet: ${dataSets}">
+    <p>Data set id: <td th:text="${dataSet.id}" /></p>
+    <p>Data set values: <td th:text="${dataSet.dataList}" /></p>
+    <p></p>
+</tr>
 </body>
 </html>
