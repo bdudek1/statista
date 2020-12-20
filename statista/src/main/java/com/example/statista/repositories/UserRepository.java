@@ -1,6 +1,5 @@
 package com.example.statista.repositories;
 
-import com.example.statista.entities.DataSet;
 import com.example.statista.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
