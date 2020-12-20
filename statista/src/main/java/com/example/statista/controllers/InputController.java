@@ -1,6 +1,6 @@
 package com.example.statista.controllers;
 
-import com.example.statista.util.DataSet;
+import com.example.statista.entities.DataSet;
 import com.example.statista.util.Input;
 import com.example.statista.util.StringToDoubleListConverter;
 import org.slf4j.Logger;
@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Controller
 public class InputController {
@@ -35,7 +34,7 @@ public class InputController {
     public String greetingSubmit(@ModelAttribute Input input, Model model) {
         //model.addAttribute("input", input);
         converter.setSeparator(input.getSeparator().equals("") ? "," : input.getSeparator());
-        dataSetList.add(new DataSet(input.getId(), converter.convert(input.getContent())));
+        dataSetList.add(new DataSet(converter.convert(input.getContent())));
         model.addAttribute("dataSets", dataSetList);
         logger.info("/input post method");
         return "input";
