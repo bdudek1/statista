@@ -19,6 +19,7 @@ public class DataSet {
 
     @NotNull
     @Column(name="values")
+    @ElementCollection(targetClass=Double.class)
     private List<Double> dataList;
 
     @NotNull
@@ -94,4 +95,8 @@ public class DataSet {
         return id.equals(dataSet.id) && user.equals(dataSet.user);
     }
 
+    @Override
+    public String toString(){
+        return user.toString() +"'s dataset." + "\n" + "Values: " + dataList.toString();
+    }
 }

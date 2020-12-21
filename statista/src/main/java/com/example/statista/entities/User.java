@@ -5,13 +5,14 @@ import io.micrometer.core.lang.NonNull;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.Objects;
 import java.util.Set;
 
 @Entity
 @Table(name="USERS")
-public class User {
+public class User implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -88,4 +89,8 @@ public class User {
         return Objects.hash(id, username);
     }
 
+    @Override
+    public String toString(){
+        return username;
+    }
 }

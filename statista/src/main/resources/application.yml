@@ -12,8 +12,8 @@ spring:
     hikari:
       driver-class-name: org.h2.Driver
       jdbc-url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-      username: sa
-      password:
+      username: admin
+      password: admin
       maximum-pool-size: 5
       connection-test-query: "SELECT 1"
       pool-name: cemsPool
@@ -25,6 +25,7 @@ spring:
   h2:
     console:
       enabled: true
+
 management:
   endpoints:
     web:

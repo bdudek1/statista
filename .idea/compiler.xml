@@ -2,8 +2,8 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <bytecodeTargetLevel>
-      <module name="statista.statista.main~1" target="15" />
-      <module name="statista.statista.test~1" target="15" />
+      <module name="statista.statista.main" target="15" />
+      <module name="statista.statista.test" target="15" />
     </bytecodeTargetLevel>
   </component>
 </project>
