@@ -32,10 +32,15 @@ import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointR
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -45,8 +50,11 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
+import org.springframework.security.web.csrf.CsrfTokenRepository;
+import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
 
 /**
  * @author Iuliana Cosmina
@@ -57,50 +65,74 @@ import javax.servlet.http.HttpServletResponse;
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 class SecurityConfig extends WebSecurityConfigurerAdapter {
 
+    private final AuthenticationProvider authProvider = new AuthenticationProvider() {
+        @Override
+        public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+            return new UsernamePasswordAuthenticationToken(authentication.getName(),
+                                                           authentication.getCredentials().toString(),
+                                                           authentication.getAuthorities());
+        }
+
+        @Override
+        public boolean supports(Class<?> authentication) {
+            return authentication.equals(UsernamePasswordAuthenticationToken.class);
+        }
+    };
+
     @Bean
     @Override
     public UserDetailsService userDetailsService() {
-        UserDetails user = User.withUsername("user").password(encoder().encode("user")).roles("USER").build();
-        UserDetails admin = User.withUsername("admin").password(encoder().encode("admin")).roles("USER", "ADMIN").build();
+        UserDetails user = User.withUsername("user")
+                                .password(passwordEncoder().encode("user"))
+                                .roles("USER")
+                                .build();
+
+        UserDetails admin = User.withUsername("admin")
+                                .password(passwordEncoder()
+                                .encode("admin"))
+                                .roles("USER", "ADMIN")
+                                .build();
+
         return new InMemoryUserDetailsManager(admin, user);
     }
 
-    @Bean
-    PasswordEncoder encoder(){
-        return new BCryptPasswordEncoder();
+    @Override
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+        auth.authenticationProvider(authProvider);
     }
-
-    AccessDeniedHandler accessDeniedHandler = (request, response, accessDeniedException) -> {
-        response.getOutputStream().print("Access denied!");
-        response.setStatus(403);
-    };
-
-    AuthenticationEntryPoint restAuthenticationEntryPoint = (request, response, authException) -> response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
-    SimpleUrlAuthenticationFailureHandler authenticationFailureHandler = new SimpleUrlAuthenticationFailureHandler();
-
-    @Autowired
-    RestAuthenticationSuccessHandler authenticationSuccessHandler;
 
     @Override
     protected void configure(final HttpSecurity http) throws Exception {
-        http.csrf().disable()
-                .exceptionHandling()
-                .accessDeniedHandler(accessDeniedHandler)
-                .authenticationEntryPoint(restAuthenticationEntryPoint)
-                .and()
+        http
                 .authorizeRequests()
-                .mvcMatchers("/home/**").hasRole("USER")
-                .mvcMatchers("/input/**").hasRole("USER")
+                .mvcMatchers("/home/**").hasAnyRole("ADMIN", "USER")
+                .mvcMatchers("/input/**").hasAnyRole("ADMIN", "USER")
                 .mvcMatchers("/**").hasAnyRole("ADMIN", "USER")
+                .anyRequest()
+                .authenticated()
                 .and()
                 .formLogin()
-                .successHandler(authenticationSuccessHandler)
-                .failureHandler(authenticationFailureHandler)
+                .defaultSuccessUrl("/home")
+                .permitAll()
                 .and()
-                .requestMatcher(EndpointRequest.to("health", "info", "dao")).authorizeRequests().anyRequest().hasRole("USER")
+                .logout()
+                .logoutSuccessUrl("/")
+                .invalidateHttpSession(true)
+                .clearAuthentication(true)
                 .and()
-                .httpBasic()
-                .and()
-                .logout();
+                .csrf().csrfTokenRepository(csrfRepo());
+    }
+
+    @Bean
+    PasswordEncoder passwordEncoder(){
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public CsrfTokenRepository csrfRepo() {
+        HttpSessionCsrfTokenRepository repo = new HttpSessionCsrfTokenRepository();
+        repo.setParameterName("_csrf");
+        repo.setHeaderName("X-CSRF-TOKEN");
+        return repo;
     }
 }
