@@ -28,9 +28,7 @@ SOFTWARE.
 package com.example.statista.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -39,6 +37,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.User;
@@ -54,12 +53,7 @@ import org.springframework.security.web.csrf.CsrfTokenRepository;
 import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
 
 import javax.servlet.http.HttpServletResponse;
-import java.util.ArrayList;
 
-/**
- * @author Iuliana Cosmina
- * @since 1.0
- */
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
@@ -78,6 +72,17 @@ class SecurityConfig extends WebSecurityConfigurerAdapter {
             return authentication.equals(UsernamePasswordAuthenticationToken.class);
         }
     };
+
+    AccessDeniedHandler accessDeniedHandler = (request, response, accessDeniedException) -> {
+        response.getOutputStream().print("Access denied!");
+        response.setStatus(403);
+    };
+
+    AuthenticationEntryPoint restAuthenticationEntryPoint = (request, response, authException) -> response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+    SimpleUrlAuthenticationFailureHandler authenticationFailureHandler = new SimpleUrlAuthenticationFailureHandler();
+
+    @Autowired
+    RestAuthenticationSuccessHandler authenticationSuccessHandler;
 
     @Bean
     @Override
@@ -104,6 +109,10 @@ class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(final HttpSecurity http) throws Exception {
         http
+                .exceptionHandling()
+                .accessDeniedHandler(accessDeniedHandler)
+                .authenticationEntryPoint(restAuthenticationEntryPoint)
+                .and()
                 .authorizeRequests()
                 .mvcMatchers("/home/**").hasAnyRole("ADMIN", "USER")
                 .mvcMatchers("/input/**").hasAnyRole("ADMIN", "USER")
@@ -112,6 +121,8 @@ class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .authenticated()
                 .and()
                 .formLogin()
+                .successHandler(authenticationSuccessHandler)
+                .failureHandler(authenticationFailureHandler)
                 .defaultSuccessUrl("/home")
                 .permitAll()
                 .and()
@@ -120,7 +131,13 @@ class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .invalidateHttpSession(true)
                 .clearAuthentication(true)
                 .and()
-                .csrf().csrfTokenRepository(csrfRepo());
+                .csrf().csrfTokenRepository(csrfRepo())
+                .and()
+                .sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                .maximumSessions(1)
+                .expiredUrl("/sessionExpired.html").and()
+                .sessionFixation().migrateSession();
     }
 
     @Bean
