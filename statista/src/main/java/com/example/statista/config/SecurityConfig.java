@@ -95,7 +95,7 @@ class SecurityConfig extends WebSecurityConfigurerAdapter {
         UserDetails admin = User.withUsername("admin")
                                 .password(passwordEncoder()
                                 .encode("admin"))
-                                .roles("USER", "ADMIN")
+                                .roles("ADMIN")
                                 .build();
 
         return new InMemoryUserDetailsManager(admin, user);
@@ -111,7 +111,7 @@ class SecurityConfig extends WebSecurityConfigurerAdapter {
         http
                 .exceptionHandling()
                 .accessDeniedHandler(accessDeniedHandler)
-                .authenticationEntryPoint(restAuthenticationEntryPoint)
+                //.authenticationEntryPoint(restAuthenticationEntryPoint)
                 .and()
                 .authorizeRequests()
                 .mvcMatchers("/home/**").hasAnyRole("ADMIN", "USER")
@@ -126,6 +126,8 @@ class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .defaultSuccessUrl("/home")
                 .permitAll()
                 .and()
+                .httpBasic()
+                .and()
                 .logout()
                 .logoutSuccessUrl("/")
                 .invalidateHttpSession(true)
@@ -134,9 +136,10 @@ class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .csrf().csrfTokenRepository(csrfRepo())
                 .and()
                 .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .maximumSessions(1)
-                .expiredUrl("/sessionExpired.html").and()
+                .expiredUrl("/sessionExpired.html")
+                .and()
                 .sessionFixation().migrateSession();
     }
 
