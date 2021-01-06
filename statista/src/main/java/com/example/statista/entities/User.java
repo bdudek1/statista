@@ -29,8 +29,8 @@ public class User implements Serializable {
     @Transient
     private String password;
 
-    @Column(name="roles", nullable = false)
-    private Set<String> roles;
+    @Column(name="role", nullable = false, unique = true)
+    private String role;
 
     @NonNull
     @Column(name = "created_at", nullable = false)
@@ -50,15 +50,14 @@ public class User implements Serializable {
         this.username = username;
         this.email = email;
         this.password = password;
-        this.roles = new HashSet<String>();
-        this.roles.add("USER");
+        this.role = "USER";
         this.creationTime = ZonedDateTime.now();
         this.lastModifiedTime = ZonedDateTime.now();
     }
 
-    public User (String username, String email, String password, Set<String> roles){
+    public User (String username, String email, String password, String role){
         this(username, email, password);
-        setRoles(roles);
+        setRole(role);
     }
 
     public Long getId() { return id; }
@@ -87,9 +86,9 @@ public class User implements Serializable {
 
     public void setLastModifiedTime(ZonedDateTime lastModifiedTime) { this.lastModifiedTime = lastModifiedTime; }
 
-    public Set<String> getRoles() { return roles; }
+    public String getRole() { return role; }
 
-    public void setRoles(Set<String> roles) { this.roles = roles; }
+    public void setRole(String role) { this.role = role; }
 
     @Override
     public boolean equals(Object o) {

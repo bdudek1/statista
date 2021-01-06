@@ -27,9 +27,11 @@ SOFTWARE.
 */
 package com.example.statista.config;
 
+import com.example.statista.util.AuthProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -59,47 +61,23 @@ import javax.servlet.http.HttpServletResponse;
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-    private final AuthenticationProvider authProvider = new AuthenticationProvider() {
-        @Override
-        public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-            return new UsernamePasswordAuthenticationToken(authentication.getName(),
-                                                           authentication.getCredentials().toString(),
-                                                           authentication.getAuthorities());
-        }
-
-        @Override
-        public boolean supports(Class<?> authentication) {
-            return authentication.equals(UsernamePasswordAuthenticationToken.class);
-        }
-    };
-
-    AccessDeniedHandler accessDeniedHandler = (request, response, accessDeniedException) -> {
-        response.getOutputStream().print("Access denied!");
-        response.setStatus(403);
-    };
-
-    AuthenticationEntryPoint restAuthenticationEntryPoint = (request, response, authException) -> response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
-    SimpleUrlAuthenticationFailureHandler authenticationFailureHandler = new SimpleUrlAuthenticationFailureHandler();
+    @Autowired
+    private CsrfTokenRepository csrfRepo;
 
     @Autowired
-    RestAuthenticationSuccessHandler authenticationSuccessHandler;
+    private PasswordEncoder passwordEncoder;
 
-    @Bean
-    @Override
-    public UserDetailsService userDetailsService() {
-        UserDetails user = User.withUsername("user")
-                                .password(passwordEncoder().encode("user"))
-                                .roles("USER")
-                                .build();
+    @Autowired
+    private AuthProvider authProvider;
 
-        UserDetails admin = User.withUsername("admin")
-                                .password(passwordEncoder()
-                                .encode("admin"))
-                                .roles("ADMIN")
-                                .build();
+    @Autowired
+    private SimpleUrlAuthenticationFailureHandler authenticationFailureHandler;
 
-        return new InMemoryUserDetailsManager(admin, user);
-    }
+    @Autowired
+    private AccessDeniedHandler accessDeniedHandler;
+
+    @Autowired
+    private RestAuthenticationSuccessHandler authenticationSuccessHandler;
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
@@ -111,12 +89,12 @@ class SecurityConfig extends WebSecurityConfigurerAdapter {
         http
                 .exceptionHandling()
                 .accessDeniedHandler(accessDeniedHandler)
-                //.authenticationEntryPoint(restAuthenticationEntryPoint)
+                //.authenticationEntryPoint(authenticationEntryPoint())
                 .and()
                 .authorizeRequests()
                 .mvcMatchers("/home/**").hasAnyRole("USER", "ADMIN")
                 .mvcMatchers("/input/**").hasAnyRole("USER", "ADMIN")
-                .mvcMatchers("/**").hasAnyRole("USER", "ADMIN")
+                .mvcMatchers("/**").permitAll()
                 .anyRequest()
                 .authenticated()
                 .and()
@@ -133,7 +111,7 @@ class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .invalidateHttpSession(true)
                 .clearAuthentication(true)
                 .and()
-                .csrf().csrfTokenRepository(csrfRepo())
+                .csrf().csrfTokenRepository(csrfRepo)
                 .and()
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
@@ -144,15 +122,19 @@ class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Bean
-    PasswordEncoder passwordEncoder(){
-        return new BCryptPasswordEncoder();
+    @Override
+    public UserDetailsService userDetailsService() {
+        UserDetails user = User.withUsername("user")
+                .password(passwordEncoder.encode("user"))
+                .roles("USER")
+                .build();
+
+        UserDetails admin = User.withUsername("admin")
+                .password(passwordEncoder.encode("admin"))
+                .roles("ADMIN")
+                .build();
+
+        return new InMemoryUserDetailsManager(admin, user);
     }
 
-    @Bean
-    public CsrfTokenRepository csrfRepo() {
-        HttpSessionCsrfTokenRepository repo = new HttpSessionCsrfTokenRepository();
-        repo.setParameterName("_csrf");
-        repo.setHeaderName("X-CSRF-TOKEN");
-        return repo;
-    }
 }
