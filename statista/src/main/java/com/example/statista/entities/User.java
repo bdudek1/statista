@@ -1,13 +1,11 @@
 package com.example.statista.entities;
 
-import com.sun.istack.NotNull;
 import io.micrometer.core.lang.NonNull;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
-import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -46,11 +44,20 @@ public class User implements Serializable {
             cascade = CascadeType.ALL)
     private Set<DataSet> dataSets;
 
+    public User(){
+        this.username = "username";
+        this.email = "email";
+        this.password = "password";
+        this.role = "ROLE_USER";
+        this.creationTime = ZonedDateTime.now();
+        this.lastModifiedTime = ZonedDateTime.now();
+    }
+
     public User(String username, String email, String password){
         this.username = username;
         this.email = email;
         this.password = password;
-        this.role = "USER";
+        this.role = "ROLE_USER";
         this.creationTime = ZonedDateTime.now();
         this.lastModifiedTime = ZonedDateTime.now();
     }

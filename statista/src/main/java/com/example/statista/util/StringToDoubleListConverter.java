@@ -7,16 +7,17 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.security.RolesAllowed;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 @Scope("prototype")
 @Component
-public class StringToDoubleListConverter implements Converter<String, List<Double>>,
-                                                    InitializingBean {
+public class StringToDoubleListConverter implements Converter<String, List<Double>>{
 
     private static final Logger logger = LoggerFactory.getLogger(StringToDoubleListConverter.class);
 
@@ -31,6 +32,7 @@ public class StringToDoubleListConverter implements Converter<String, List<Doubl
 
     public void setSeparator(String separator) { this.separator = separator; }
 
+    @RolesAllowed({ "ROLE_USER", "ROLE_ADMIN" })
     @Override
     public List<Double> convert(String source) {
         if(source.contains(separator)){
@@ -42,10 +44,5 @@ public class StringToDoubleListConverter implements Converter<String, List<Doubl
         }else{
             throw new InvalidInputException();
         }
-    }
-
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        logger.info("Converter initialised.");
     }
 }

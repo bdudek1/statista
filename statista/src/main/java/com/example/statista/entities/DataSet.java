@@ -1,6 +1,6 @@
 package com.example.statista.entities;
 
-import com.sun.istack.NotNull;
+import io.micrometer.core.lang.NonNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -17,17 +17,16 @@ public class DataSet {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull
-    @Column(name="values")
+    @NonNull
     @ElementCollection(targetClass=Double.class)
     private List<Double> dataList;
 
-    @NotNull
+    @NonNull
     @Column(name = "created_at", nullable = false)
     @DateTimeFormat(pattern = "dd-MM-yyyy HH:mm")
     private ZonedDateTime creationTime;
 
-    @NotNull
+    @NonNull
     @Column(name = "last_modified_at", nullable = false)
     @DateTimeFormat(pattern = "dd-MM-yyyy HH:mm")
     private ZonedDateTime lastModifiedTime;
@@ -40,6 +39,10 @@ public class DataSet {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    public DataSet(){
+        creationTime = ZonedDateTime.now();
+        lastModifiedTime = ZonedDateTime.now();
+    }
 
     public DataSet(List<Double> dataList){
         this.dataList = dataList;
