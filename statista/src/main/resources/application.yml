@@ -21,7 +21,7 @@ spring:
       password: admin
       maximum-pool-size: 5
       connection-test-query: "SELECT 1"
-      pool-name: cemsPool
+      pool-name: pool
   jpa:
     generate-ddl: true
     hibernate:

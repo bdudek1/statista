@@ -24,12 +24,12 @@ public class DataSet {
 
     @NotNull
     @Column(name = "created_at", nullable = false)
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
+    @DateTimeFormat(pattern = "dd-MM-yyyy HH:mm")
     private ZonedDateTime creationTime;
 
     @NotNull
     @Column(name = "last_modified_at", nullable = false)
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
+    @DateTimeFormat(pattern = "dd-MM-yyyy HH:mm")
     private ZonedDateTime lastModifiedTime;
 
     @Value("")

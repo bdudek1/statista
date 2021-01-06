@@ -7,6 +7,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -28,14 +29,17 @@ public class User implements Serializable {
     @Transient
     private String password;
 
-    @NotNull
+    @Column(name="roles", nullable = false)
+    private Set<String> roles;
+
+    @NonNull
     @Column(name = "created_at", nullable = false)
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
+    @DateTimeFormat(pattern = "dd-MM-yyyy HH:mm")
     private ZonedDateTime creationTime;
 
-    @NotNull
+    @NonNull
     @Column(name = "last_modified_at", nullable = false)
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
+    @DateTimeFormat(pattern = "dd-MM-yyyy HH:mm")
     private ZonedDateTime lastModifiedTime;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY,
@@ -46,8 +50,15 @@ public class User implements Serializable {
         this.username = username;
         this.email = email;
         this.password = password;
+        this.roles = new HashSet<String>();
+        this.roles.add("USER");
         this.creationTime = ZonedDateTime.now();
         this.lastModifiedTime = ZonedDateTime.now();
+    }
+
+    public User (String username, String email, String password, Set<String> roles){
+        this(username, email, password);
+        setRoles(roles);
     }
 
     public Long getId() { return id; }
@@ -75,6 +86,10 @@ public class User implements Serializable {
     public ZonedDateTime getLastModifiedTime() { return lastModifiedTime; }
 
     public void setLastModifiedTime(ZonedDateTime lastModifiedTime) { this.lastModifiedTime = lastModifiedTime; }
+
+    public Set<String> getRoles() { return roles; }
+
+    public void setRoles(Set<String> roles) { this.roles = roles; }
 
     @Override
     public boolean equals(Object o) {
