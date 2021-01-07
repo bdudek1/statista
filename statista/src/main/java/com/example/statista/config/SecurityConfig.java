@@ -115,22 +115,11 @@ class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .expiredUrl("/sessionExpired.html")
                 .and()
                 .sessionFixation().migrateSession();
-    }
 
-//    @Bean
-//    @Override
-//    public UserDetailsService userDetailsService() {
-//        UserDetails user = User.withUsername("user")
-//                .password(passwordEncoder.encode("user"))
-//                .roles("USER")
-//                .build();
-//
-//        UserDetails admin = User.withUsername("admin")
-//                .password(passwordEncoder.encode("admin"))
-//                .roles("ADMIN")
-//                .build();
-//
-//        return new InMemoryUserDetailsManager(admin, user);
-//    }
+        http
+                .requiresChannel()
+                .anyRequest()
+                .requiresSecure();
+    }
 
 }

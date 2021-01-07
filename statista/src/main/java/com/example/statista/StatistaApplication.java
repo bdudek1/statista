@@ -13,14 +13,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class StatistaApplication {
 	private static final Logger logger = LoggerFactory.getLogger(StatistaApplication.class);
 
-	@Autowired
-	//static UserService userService;
-
 	public static void main(String[] args) {
 		SpringApplication.run(StatistaApplication.class, args);
 		logger.info("Application started.");
-//		userService.save(new User("user", "user@gmail.com", "user", "ROLE_USER"));
-//		userService.save(new User("admin", "admin@gmail.com", "admin", "ROLE_ADMIN"));
 	}
 
 }

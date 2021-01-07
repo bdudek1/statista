@@ -67,12 +67,10 @@ public class UserService implements UserDetailsService {
 
     @PostConstruct
     void initUsers(){
-//        User user = new User("user", "user@gmail.com", "user", "ROLE_USER");
-//        User admin = new User("admin", "admin@gmail.com", "admin", "ROLE_ADMIN");
-//        save(user);
-//        save(admin);
-//        delete(user);
-//
-//        logger.info("Loading user: " + userRepo.findByUsername("admin"));
+        User user = new User("user", "user@gmail.com", "{noop}user", "ROLE_USER");
+        User admin = new User("admin", "admin@gmail.com", "{noop}admin", "ROLE_ADMIN");
+        save(user);
+        save(admin);
+        logger.info("Initialized some users");
     }
 }

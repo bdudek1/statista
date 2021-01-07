@@ -1,7 +1,5 @@
 package com.example.statista.config;
 
-import com.example.statista.services.UserService;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
