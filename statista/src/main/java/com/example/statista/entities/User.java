@@ -24,10 +24,9 @@ public class User implements Serializable {
     private String email;
 
     @NonNull
-    @Transient
     private String password;
 
-    @Column(name="role", nullable = false, unique = true)
+    @Column(name="role", nullable = false)
     private String role;
 
     @NonNull

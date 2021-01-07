@@ -40,12 +40,6 @@ class StatistaApplicationTests {
 		mockMvc.perform(post("/input"))
 				.andExpect(status().isOk());
 
-		//mockMvc.perform(get("/actuator"))
-		//		.andExpect(status().isOk());
-
-		//mockMvc.perform(get("/actuator/prometheus"))
-		//		.andExpect(status().isOk());
-
 		mockMvc.perform(get("/randomurl"))
 				.andExpect(status().is4xxClientError());
 	}
