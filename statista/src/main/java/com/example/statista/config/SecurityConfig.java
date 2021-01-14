@@ -27,9 +27,7 @@ SOFTWARE.
 */
 package com.example.statista.config;
 
-import com.example.statista.util.AuthProvider;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -39,15 +37,12 @@ import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.security.web.csrf.CsrfTokenRepository;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 
 @Profile("dev")
 @Configuration
@@ -57,6 +52,9 @@ class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
     private CsrfTokenRepository csrfRepo;
+
+    @Autowired
+    private RequestMatcher csrfRequestMatcher;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -76,6 +74,9 @@ class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private AuthenticationEntryPoint authenticationEntryPoint;
 
+    @Override public void configure(WebSecurity web) throws Exception {
+        web.ignoring().antMatchers("/h2-console/**"); }
+
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.authenticationProvider(authProvider);
@@ -90,6 +91,7 @@ class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .authenticationEntryPoint(authenticationEntryPoint)
                 .and()
                 .authorizeRequests()
+                .antMatchers("/h2-console/**").permitAll()
                 .mvcMatchers("/home/**").hasAnyRole("USER", "ADMIN")
                 .mvcMatchers("/input/**").hasAnyRole("USER", "ADMIN")
                 .mvcMatchers("/**").permitAll()
@@ -107,10 +109,9 @@ class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .logout()
                 .logoutSuccessUrl("/")
                 .invalidateHttpSession(true)
-                .clearAuthentication(true)
-                .and()
-                .csrf().csrfTokenRepository(csrfRepo)
-                .and()
+                .clearAuthentication(true);
+
+        http
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .maximumSessions(1)
@@ -122,6 +123,15 @@ class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .requiresChannel()
                 .anyRequest()
                 .requiresSecure();
+
+        http
+                .csrf()
+                .csrfTokenRepository(csrfRepo)
+                .requireCsrfProtectionMatcher(csrfRequestMatcher)
+                .ignoringAntMatchers("/h2-console/**", "/h2-console");
+
+        http
+                .headers().frameOptions().disable();
 
     }
 

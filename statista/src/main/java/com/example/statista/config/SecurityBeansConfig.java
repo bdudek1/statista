@@ -1,10 +1,8 @@
 package com.example.statista.config;
 
-import com.example.statista.util.AuthProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -12,8 +10,10 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.security.web.csrf.CsrfTokenRepository;
 import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
-import org.springframework.security.web.server.SecurityWebFilterChain;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 @Profile("dev")
@@ -33,6 +33,11 @@ public class SecurityBeansConfig {
     }
 
     @Bean
+    public RequestMatcher csrfRequestMatcher(){
+        return new CustomRequestMatcher();
+    }
+
+    @Bean
     AuthProvider authProvider(){
         return new AuthProvider();
     }
@@ -44,10 +49,7 @@ public class SecurityBeansConfig {
 
     @Bean
     AccessDeniedHandler accessDeniedHandler(){
-        return (request, response, accessDeniedException) -> {
-            response.getOutputStream().print("Access denied!");
-            response.setStatus(403);
-        };
+        return new CustomAccessDeniedHandler();
     }
 
     @Bean
@@ -57,7 +59,8 @@ public class SecurityBeansConfig {
 
     @Bean
     AuthenticationEntryPoint authenticationEntryPoint(){
-        return (request, response, authException) -> response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+        return (request, response, authException) ->
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
     }
 
 }

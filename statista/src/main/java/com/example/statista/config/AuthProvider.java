@@ -1,4 +1,4 @@
-package com.example.statista.util;
+package com.example.statista.config;
 
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
