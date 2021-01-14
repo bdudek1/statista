@@ -32,8 +32,8 @@ public class StringToDoubleListConverter implements Converter<String, List<Doubl
 
     public void setSeparator(String separator) { this.separator = separator; }
 
-    @RolesAllowed({ "ROLE_USER", "ROLE_ADMIN" })
     @Override
+    @RolesAllowed({ "ROLE_USER", "ROLE_ADMIN" })
     public List<Double> convert(String source) {
         if(source.contains(separator)){
             List<Double> doubleList = new ArrayList<>();
