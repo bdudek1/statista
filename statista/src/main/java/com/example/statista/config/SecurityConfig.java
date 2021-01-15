@@ -42,6 +42,7 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.security.web.csrf.CsrfTokenRepository;
+import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
 @Profile("dev")
@@ -74,8 +75,12 @@ class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private AuthenticationEntryPoint authenticationEntryPoint;
 
+    @Autowired
+    private SecurityWebFilterChain springSecurityFilterChain;
+
     @Override public void configure(WebSecurity web) throws Exception {
-        web.ignoring().antMatchers("/h2-console/**"); }
+        web.ignoring().antMatchers("/h2-console/**");
+    }
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
@@ -127,11 +132,8 @@ class SecurityConfig extends WebSecurityConfigurerAdapter {
         http
                 .csrf()
                 .csrfTokenRepository(csrfRepo)
-                .requireCsrfProtectionMatcher(csrfRequestMatcher)
-                .ignoringAntMatchers("/h2-console/**", "/h2-console");
+                .requireCsrfProtectionMatcher(csrfRequestMatcher);
 
-        http
-                .headers().frameOptions().disable();
 
     }
 
