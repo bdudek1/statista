@@ -1,13 +1,10 @@
 package com.example.statista;
 
-import com.example.statista.entities.User;
-import com.example.statista.services.UserService;
-import org.apache.catalina.security.SecurityConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+
 
 @SpringBootApplication
 public class StatistaApplication {

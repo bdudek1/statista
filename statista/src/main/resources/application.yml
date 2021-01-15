@@ -49,4 +49,3 @@ logging:
   level:
     root: INFO
     org.springframework: DEBUG
-    com.apress.cems.boot: DEBUG

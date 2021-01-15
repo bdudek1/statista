@@ -54,7 +54,7 @@ class SecurityConfig extends WebSecurityConfigurerAdapter {
     private CsrfTokenRepository csrfRepo;
 
     @Autowired
-    private RequestMatcher csrfRequestMatcher;
+    private CustomRequestMatcher csrfRequestMatcher;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -66,7 +66,7 @@ class SecurityConfig extends WebSecurityConfigurerAdapter {
     private SimpleUrlAuthenticationFailureHandler authenticationFailureHandler;
 
     @Autowired
-    private AccessDeniedHandler accessDeniedHandler;
+    private CustomAccessDeniedHandler accessDeniedHandler;
 
     @Autowired
     private RestAuthenticationSuccessHandler authenticationSuccessHandler;
