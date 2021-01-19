@@ -22,9 +22,10 @@ import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import javax.servlet.http.HttpServletResponse;
 
-@Profile("dev")
+//@Profile("dev")
 @Configuration
 public class SecurityBeansConfig {
+
     @Bean
     PasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();
@@ -69,12 +70,12 @@ public class SecurityBeansConfig {
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
     }
 
-    @Bean
-    SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
-        http
-                .redirectToHttps();
-        return http.build();
-    }
+//    @Bean
+//    SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
+//        http
+//                .redirectToHttps();
+//        return http.build();
+//    }
 
     @Bean
     public ServletWebServerFactory servletContainer() {
@@ -89,23 +90,23 @@ public class SecurityBeansConfig {
                 context.addConstraint(securityConstraint);
             }
         };
-        tomcat.addAdditionalTomcatConnectors(redirectConnector());
+        //tomcat.addAdditionalTomcatConnectors(redirectConnector());
         return tomcat;
     }
 
-    @Value("${server.port.http}")
-    int httpPort;
-
-    @Value("${server.port}")
-    int httpsPort;
-
-    private Connector redirectConnector() {
-        Connector connector = new Connector(TomcatServletWebServerFactory.DEFAULT_PROTOCOL);
-        connector.setScheme("http");
-        connector.setPort(httpPort);
-        connector.setSecure(false);
-        connector.setRedirectPort(httpsPort);
-        return connector;
-    }
+//    @Value("${server.port.http}")
+//    int httpPort;
+//
+//    @Value("${server.port}")
+//    int httpsPort;
+//
+//    private Connector redirectConnector() {
+//        Connector connector = new Connector(TomcatServletWebServerFactory.DEFAULT_PROTOCOL);
+//        connector.setScheme("http");
+//        connector.setPort(httpPort);
+//        connector.setSecure(false);
+//        connector.setRedirectPort(httpsPort);
+//        return connector;
+//    }
 
 }
